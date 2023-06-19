@@ -27,26 +27,32 @@ public with sharing class ProductHelper {
         return defaultPricebookId;
     }
 
-    public Static List<Pricebook2> getPricebookCurrencyList() {
-        List<Pricebook2> pricebookList =  [
-            SELECT Id, CurrencyIsoCode 
-            FROM Pricebook2
+    public Static Set<String> getCurrencyList() {
+ 
+        List<CurrencyType> currencyList =  [
+            SELECT Id, IsoCode 
+            FROM CurrencyType
         ];
 
-        return pricebookList;
+        Set<String> currencyCodeSet = new Set<String>();
+        for (CurrencyType currencyType : currencyList) {
+            currencyCodeSet.add(currencyType.isoCode);
+        }
+
+        return currencyCodeSet;
     }
 
     public static List<PricebookEntry> createPriceBookEntry(List<Product2> productList, String pricebookId) {
         List<PricebookEntry> pricebookEntryList = new List<PricebookEntry>();
-        List<Pricebook2> pricebookList = getPricebookCurrencyList();
+        Set<String> currencyCodeSet = getCurrencyList();
 
-        for (Pricebook2 pricebook : pricebookList) {
+        for (String currencyCode : currencyCodeSet) {
             for (Product2 product : productList) { 
                 PricebookEntry newPricebookEntry = new PricebookEntry (
                     Product2Id = product.Id,
                     Pricebook2Id = pricebookId,
                     UnitPrice = 0,
-                    CurrencyIsoCode = pricebook.CurrencyIsoCode
+                    CurrencyIsoCode = currencyCode
                 );
                 
                 pricebookEntryList.add(newPricebookEntry);
